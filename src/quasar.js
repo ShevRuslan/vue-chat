@@ -9,9 +9,10 @@ import '@quasar/extras/material-icons-outlined/material-icons-outlined.css';
 import '@quasar/extras/material-icons-round/material-icons-round.css';
 import '@quasar/extras/material-icons-sharp/material-icons-sharp.css';
 import { Quasar } from 'quasar';
+import config from '../quasar.conf';
 
 Vue.use(Quasar, {
-  config: {},
+  config: config,
   components: {
     /* not needed if importStrategy is not 'manual' */
   },
