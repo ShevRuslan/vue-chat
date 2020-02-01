@@ -1,6 +1,6 @@
 <template>
-  <div class="home window-height column items-center q-pa-lg justify-center">
-    <h2>Домашняя страница</h2>
+  <div class="window-height column items-center q-pa-lg justify-center">
+    <h3>LeebarChat - чат твоей мечты!</h3>
     <transition name="component-fade" mode="out-in">
       <component v-on:showAuth="changeForm" v-bind:is="showAuth ? 'Auth' : 'Register'"></component>
     </transition>
@@ -23,6 +23,7 @@ export default {
     };
   },
   methods: {
+    //Функция, для смены форм (авторизация -> регистрация; регистрация -> авторизация)
     changeForm: function() {
       this.showAuth = !this.showAuth;
     }
@@ -34,7 +35,8 @@ export default {
 .component-fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.component-fade-enter, .component-fade-leave-to {
+.component-fade-enter,
+.component-fade-leave-to {
   opacity: 0;
 }
 </style>

@@ -6,8 +6,25 @@
 
     <q-card-actions class="column items-start">
       <q-form class="width">
-        <q-input outlined label="Логин" class="input" v-model="data.login" />
-        <q-input v-model="data.password" :type="isPwd ? 'password' : 'text'" outlined label="Пароль" class="input">
+        <q-input
+          outlined
+          label="Логин"
+          class="input"
+          v-model="data.login"
+          ref="login"
+          lazy-rules
+          :rules="[val => (val && val.length > 0) || 'Введите логин!']"
+        />
+        <q-input
+          v-model="data.password"
+          :type="isPwd ? 'password' : 'text'"
+          outlined
+          label="Пароль"
+          class="input"
+          ref="password"
+          lazy-rules
+          :rules="[val => (val && val.length > 0) || 'Введите пароль!']"
+        >
           <template v-slot:append>
             <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
           </template>
@@ -33,9 +50,14 @@ export default {
   },
   methods: {
     submit: async function() {
-      const serializeData = JSON.stringify(this.data);
-      const response = await fetch('/auth', { body: serializeData, method: 'POST' });
-      console.log(response.json());
+      this.$refs.login.validate(); //Запускаем валидацию поля логина
+      this.$refs.password.validate(); //Запускаем валидацию поля пароля
+      //Если ошибок нет - отправляем запрос на сервер
+      if (!this.$refs.login.hasError && !this.$refs.password.hasError) {
+        const serializeData = JSON.stringify(this.data);
+        const response = await fetch('/login', { body: serializeData, method: 'POST' });
+        console.log(response.json());
+      }
     }
   }
 };
@@ -48,7 +70,7 @@ export default {
   }
   .input {
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
   }
 }
 </style>
