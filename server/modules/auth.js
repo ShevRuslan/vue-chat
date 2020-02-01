@@ -6,7 +6,7 @@ const { jwtSecret } = require('../config/config.json');
 const { ValidationResult } = require('express-validator');
 
 module.exports = class {
-  singin = async (req, res) => {
+  signIn = async (req, res) => {
     //Регистрация пользователя
     try {
       const erros = ValidationResult(req).mapped();
@@ -30,7 +30,7 @@ module.exports = class {
       return err;
     }
   };
-  signup = async (req, res) => {
+  signUp = async (req, res) => {
     try {
       const erros = ValidationResult(req).mapped();
       if (erros) {

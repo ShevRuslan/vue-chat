@@ -21,7 +21,7 @@ router.post(
       .exists()
       .withMessage('Поле "Секретный ключ" не заполнено')
   ],
-  auth.signin
+  auth.signIn
 );
 
 router.post('/login', [
@@ -30,7 +30,8 @@ router.post('/login', [
     .withMessage('Поле login не заполнено'),
   check('password')
     .exists()
-    .withMessage('Поле password не заполнено')
+    .withMessage('Поле password не заполнено'),
+  auth.signUp
 ]);
 
 module.exports = router;
