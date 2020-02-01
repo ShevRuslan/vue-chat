@@ -5,12 +5,12 @@ const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/config.json');
 
 const singin = async (req, res) => {
-  //регистрация пользователя
+  //Регистрация пользователя
   try {
-    const { login, password } = req.body; //получение значений из формы
-    const search = User.findOne({ login: login }).exec(); //поиск юзера с таким же логином
-    if (search) {
-      //если найден, сообщить об этом
+    const { login, password } = req.body; //Получение значений из формы
+    const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
+    if (!search) {
+      //Если не был найден, сообщить об этом
       res.json(`Пользователь с логином ${login} не найден`);
     }
     const valid = bcryptjs.compareSync(password, User.password);
@@ -25,6 +25,31 @@ const singin = async (req, res) => {
   }
 };
 
+const signup = async (req, res) => {
+  try {
+    const { login, password, repeatPassword, secretKey } = req.body;
+    const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
+    if (search) {
+      //Если найден, сообщить об этом
+      res.json(`Пользователь с логином ${login} уже существует. Придумайте новый`);
+    }
+    if (password !== repeatPassword) {
+      res.status(400).json('Пароли не совпадают');
+    }
+    const passwordHash = jwt(password, jwtSecret);
+    const complete = User.create({
+      login,
+      password: passwordHash,
+      secretKey
+    });
+    res.status(200).json('Готово');
+    res.json({ complete });
+  } catch (err) {
+    return err;
+  }
+};
+
 module.exports = {
-  singin
+  singin,
+  signup
 };
