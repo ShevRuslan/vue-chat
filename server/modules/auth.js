@@ -3,6 +3,7 @@ const User = mongoose.model('user');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/config.json');
+const { ValidationResult } = require('express-validator');
 
 module.exports = class {
   singin = async (req, res) => {
@@ -28,13 +29,18 @@ module.exports = class {
   signup = async (req, res) => {
     try {
       const { login, password, secretKey } = req.body;
+      const erros = ValidationResult(req).mapped();
+      if (erros) {
+        return res.status(200).json({ erros: erros });
+      }
       const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
       if (search) {
         //Если найден, сообщить об этом
         res.json(`Пользователь с логином ${login} уже существует. Придумайте новый`);
       }
-      const passwordHash = jwt(password, jwtSecret);//Хеш параоля
-      User.create({ //Создание пароля
+      const passwordHash = jwt(password, jwtSecret); //Хеш параоля
+      User.create({
+        //Создание пароля
         login,
         password: passwordHash,
         secretKey
