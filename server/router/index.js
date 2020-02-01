@@ -7,7 +7,7 @@ router.get('/test', (request, response) => {
 });
 
 router.post(
-  '/login',
+  '/register',
   [
     check('login')
       .exists()
@@ -16,9 +16,21 @@ router.post(
       .exists()
       .withMessage('Поле password не заполнено')
       .isLength({ min: 8 })
-      .withMessage('Пароль должен быть не меньше 8 символов')
+      .withMessage('Пароль должен быть не меньше 8 символов'),
+    check('secretKey')
+      .exists()
+      .withMessage('Поле "Секретный ключ" не заполнено')
   ],
   auth.signin
 );
+
+router.post('/login', [
+  check('login')
+    .exists()
+    .withMessage('Поле login не заполнено'),
+  check('password')
+    .exists()
+    .withMessage('Поле password не заполнено')
+]);
 
 module.exports = router;

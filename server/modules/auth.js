@@ -9,6 +9,10 @@ module.exports = class {
   singin = async (req, res) => {
     //Регистрация пользователя
     try {
+      const erros = ValidationResult(req).mapped();
+      if (erros) {
+        return res.status(200).json({ erros: erros });
+      }
       const { login, password } = req.body; //Получение значений из формы
       const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
       if (!search) {
@@ -28,11 +32,11 @@ module.exports = class {
   };
   signup = async (req, res) => {
     try {
-      const { login, password, secretKey } = req.body;
       const erros = ValidationResult(req).mapped();
       if (erros) {
         return res.status(200).json({ erros: erros });
       }
+      const { login, password, secretKey } = req.body;
       const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
       if (search) {
         //Если найден, сообщить об этом
