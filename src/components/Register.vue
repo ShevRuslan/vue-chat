@@ -1,20 +1,21 @@
 <template>
-  <q-card class="my-card ">
+  <q-card class="my-card">
     <q-card-section>
-      <h5 class="text-center q-ma-none ">Авторизация</h5>
+      <h5 class="text-center q-ma-none ">Регистрация</h5>
     </q-card-section>
 
     <q-card-actions class="column items-start">
-      <q-form class="width">
+      <q-form class="col width">
         <q-input outlined label="Логин" class="input" v-model="data.login" />
         <q-input v-model="data.password" :type="isPwd ? 'password' : 'text'" outlined label="Пароль" class="input">
           <template v-slot:append>
             <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
           </template>
         </q-input>
-        <q-btn label="Авторизироваться" type="submit" color="primary" class="input" v-on:click="submit" />
+        <q-input v-model="data.secretKey" outlined label="Секретный ключ" class="input" />
+        <q-btn label="Зарегистрироваться" type="submit" color="primary" class="input" v-on:click="submit" />
       </q-form>
-      <q-btn size="12px" flat v-on:click="$emit('showAuth')">Зарегистрироваться</q-btn>
+      <q-btn size="12px" flat v-on:click="$emit('showAuth')">Авторизироваться</q-btn>
     </q-card-actions>
   </q-card>
 </template>
@@ -26,7 +27,8 @@ export default {
     return {
       data: {
         login: '',
-        password: ''
+        password: '',
+        secretKey: ''
       },
       isPwd: true
     };
