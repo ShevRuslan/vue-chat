@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const User = mongoose.model('user');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { check, validationResult } = require('express-validator');
 const { jwtSecret } = require('../config/config.json');
 
 module.exports = class {
@@ -28,20 +27,11 @@ module.exports = class {
   };
   signup = async (req, res) => {
     try {
-      const { login, password, repeatPassword, secretKey } = req.body;
-      check('password').isLength({ min: 5 }); //Начало валидации логина и пароля
-      check('login').normalize();
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-      }//Конец валидации
+      const { login, password, secretKey } = req.body;
       const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
       if (search) {
         //Если найден, сообщить об этом
         res.json(`Пользователь с логином ${login} уже существует. Придумайте новый`);
-      }
-      if (password !== repeatPassword) {
-        res.status(400).json('Пароли не совпадают');
       }
       const passwordHash = jwt(password, jwtSecret);//Хеш параоля
       User.create({ //Создание пароля
