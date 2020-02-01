@@ -1,57 +1,131 @@
-const mongoose = require('mongoose');
-const User = mongoose.model('user');
-const bcryptjs = require('bcryptjs');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const { jwtSecret } = require('../config/config.json');
-const { ValidationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const salt = bcrypt.genSaltSync(10);
+const config = require('../config/config.json');
+const passport = require('passport');
+const passportJWT = require('passport-jwt');
+const ExtractJWT = passportJWT.ExtractJwt;
+const JWTStrategy = passportJWT.Strategy;
+const { validationResult } = require('express-validator');
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+  secretOrKey: config.jwtSecret
+};
+const strategy = new JWTStrategy(jwtOptions, (payload, next) => {
+  User.findOne({ _id: payload.id }, (err, user) => {
+    if (err) return next(err);
+    if (user) {
+      next(null, user);
+    } else {
+      next(null, false);
+    }
+  });
+});
+passport.use(strategy);
 
 module.exports = class {
-  signIn = async (req, res) => {
-    //Регистрация пользователя
+  //Регистрация пользователя
+  login = async (request, response) => {
+    const errors = validationResult(request).mapped();
+
+    if (errors) {
+      return response.status(200).json({ errors: errors });
+    }
+
+    const { login, password } = request.body;
+
     try {
-      const erros = ValidationResult(req).mapped();
-      if (erros) {
-        return res.status(200).json({ erros: erros });
+      const user = await User.findOne({ login });
+
+      if (!user) {
+        response.status(401).json({ message: 'Пользователь не найден.' });
       }
-      const { login, password } = req.body; //Получение значений из формы
-      const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
-      if (!search) {
-        //Если не был найден, сообщить об этом
-        res.json(`Пользователь с логином ${login} не найден`);
-      }
-      const valid = bcryptjs.compareSync(password, User.password);
-      if (valid) {
-        const token = jwt.sign(User._id.toString(), jwtSecret);
-        res.json({ token });
-      } else {
-        res.status(400).json('ошибка в валидации');
+
+      if (bcrypt.compareSync(password, user.password)) {
+        const token = jwt.sign({ id: user.id }, config.secret, { expiresIn: config.tokenLife });
+        const refreshToken = jwt.sign({ id: user.id }, config.refreshTokenSecret, {
+          expiresIn: config.refreshTokenLife
+        });
+        user.refresh_token = refreshToken;
+        await user.save();
+        const res = {
+          'status': 'Logged in',
+          'success': true,
+          'token': token,
+          'refreshToken': refreshToken
+        };
+        response.status(200).json(res);
       }
     } catch (err) {
-      return err;
+      response.status(401).json({ message: `Ошибка с базой данных. ${err}` });
     }
   };
-  signUp = async (req, res) => {
+  register = async (request, response) => {
+    const errors = validationResult(request).mapped();
+
+    if (errors) {
+      return response.status(200).json({ errors: errors });
+    }
+
+    const { login, password, secretKey } = request.body;
+
+    const user = await User.findOne({ login });
+    if (user) {
+      response.status(401).json({ message: 'Пользователь существует!' });
+    }
+    const countUsers = await User.count({});
+    const lastId = countUsers + 1;
+    const token = jwt.sign({ id: lastId }, config.secret, { expiresIn: config.tokenLife });
+    const refreshToken = jwt.sign({ id: lastId }, config.refreshTokenSecret, {
+      expiresIn: config.refreshTokenLife
+    });
+    let newUser = new User({
+      login: login,
+      secretKey: secretKey,
+      password: bcrypt.hashSync(password, salt),
+      refresh_token: refreshToken
+    });
     try {
-      const erros = ValidationResult(req).mapped();
-      if (erros) {
-        return res.status(200).json({ erros: erros });
-      }
-      const { login, password, secretKey } = req.body;
-      const search = User.findOne({ login: login }).exec(); //Поиск юзера с таким же логином
-      if (search) {
-        //Если найден, сообщить об этом
-        res.json(`Пользователь с логином ${login} уже существует. Придумайте новый`);
-      }
-      const passwordHash = jwt(password, jwtSecret); //Хеш параоля
-      User.create({
-        //Создание пароля
-        login,
-        password: passwordHash,
-        secretKey
+      await newUser.save();
+      response.status(200).json({
+        status: 'Регистрация прошла успешно!',
+        success: true,
+        token: token,
+        refreshToken: refreshToken
       });
-      res.status(200).json('Готово');
     } catch (err) {
-      return err;
+      response.status(500).json({ message: 'Регистрация провалилась.' });
+    }
+  };
+  refreshToken = async (request, response) => {
+    const { refreshToken } = request.body;
+    try {
+      const decoded = jwt.verify(refreshToken, config.secret);
+      const timeLifeRefToken = decoded.exp;
+      const currentTime = new Date().getTime() / 1000;
+      if (currentTime > timeLifeRefToken) {
+        response.status(401).json({ 'Error': 'TOKEN_EXPIRED' });
+      } else {
+        const user = await User.findOne({ refresh_token: refreshToken });
+        if (user) {
+          const token = jwt.sign({ id: user.id }, config.secret, { expiresIn: config.tokenLife });
+          const refreshToken = jwt.sign({ id: user.id }, config.refreshTokenSecret, {
+            expiresIn: config.refreshTokenLife
+          });
+          const res = {
+            'token': token,
+            'refreshToken': refreshToken
+          };
+          user.refresh_token = refreshToken;
+          await user.save();
+          response.status(200).json(res);
+        }
+        response.status(404).send('Пользователь не найден');
+      }
+    } catch (err) {
+      response.status(401).json({ message: `${err}` });
     }
   };
 };
