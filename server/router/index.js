@@ -8,24 +8,37 @@ router.post(
   '/register',
   [
     check('login')
-      .exists().withMessage('Поле login не заполнено'),
+      .exists()
+      .withMessage('Вы не ввели логин!'),
     check('password')
-      .exists().withMessage('Поле password не заполнено')
-      .isLength({ min: 8 }).withMessage('Пароль должен быть не меньше 8 символов'),
+      .exists()
+      .withMessage('Вы не ввели пароль!')
+      .isLength({ min: 8 })
+      .withMessage('Пароль должен быть не меньше 8 символов!'),
     check('secretKey')
-      .exists().withMessage('Поле "Секретный ключ" не заполнено')
+      .exists()
+      .withMessage('Вы не ввели секретный ключ!')
+      .isLength({ min: 8 })
+      .withMessage('Секретный ключ должен быть не меньше 8 символов'),
   ],
   register
 );
 
-router.post('/login', [
-  check('login')
-    .exists().withMessage('Поле login не заполнено'),
-  check('password')
-    .exists().withMessage('Поле password не заполнено'),
+router.post(
+  '/login',
+  [
+    check('login')
+      .exists()
+      .withMessage('Введите почту!'),
+    check('password')
+      .exists()
+      .withMessage('Введите пароль!')
+      .isLength({ min: 8 })
+      .withMessage('Пароль должен быть не меньше 8 символов!')
+  ],
   login
-]);
+);
 
-router.post('/token', refreshToken)
+router.post('/token', refreshToken);
 
 module.exports = router;
