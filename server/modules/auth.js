@@ -11,7 +11,7 @@ const { validationResult } = require('express-validator');
 
 const jwtOptions = {
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-  secretOrKey: config.jwtSecret
+  secretOrKey: config.secret
 };
 const strategy = new JWTStrategy(jwtOptions, (payload, next) => {
   User.findOne({ _id: payload.id }, (err, user) => {
@@ -26,11 +26,11 @@ const strategy = new JWTStrategy(jwtOptions, (payload, next) => {
 passport.use(strategy);
 
 module.exports = class {
-  //Регистрация пользователя
+  //Авторизация пользователя
   login = async (request, response) => {
     const errors = validationResult(request).mapped();
-
-    if (errors) {
+    console.log(errors);
+    if (Object.entries(errors).length !== 0 && errors.constructor === Object) {
       return response.status(200).json({ errors: errors });
     }
 
@@ -62,10 +62,11 @@ module.exports = class {
       response.status(401).json({ message: `Ошибка с базой данных. ${err}` });
     }
   };
+  //Регистрация пользователя
   register = async (request, response) => {
     const errors = validationResult(request).mapped();
 
-    if (errors) {
+    if (Object.entries(errors).length !== 0 && errors.constructor === Object) {
       return response.status(200).json({ errors: errors });
     }
 
@@ -88,13 +89,15 @@ module.exports = class {
       refresh_token: refreshToken
     });
     try {
-      await newUser.save();
-      response.status(200).json({
-        status: 'Регистрация прошла успешно!',
-        success: true,
-        token: token,
-        refreshToken: refreshToken
-      });
+      const saveUser = await newUser.save();
+      if (saveUser) {
+        response.status(200).json({
+          status: 'Регистрация прошла успешно!',
+          success: true,
+          token: token,
+          refreshToken: refreshToken
+        });
+      }
     } catch (err) {
       response.status(500).json({ message: 'Регистрация провалилась.' });
     }
