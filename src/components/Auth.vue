@@ -37,6 +37,8 @@
 </template>
 
 <script>
+import Api from '../service/api';
+
 export default {
   name: 'Auth',
   data() {
@@ -54,9 +56,10 @@ export default {
       this.$refs.password.validate(); //Запускаем валидацию поля пароля
       //Если ошибок нет - отправляем запрос на сервер
       if (!this.$refs.login.hasError && !this.$refs.password.hasError) {
+        const api = new Api();
         const serializeData = JSON.stringify(this.data);
-        const response = await fetch('/login', { body: serializeData, method: 'POST' });
-        console.log(response.json());
+        const response = await api.loginUser(serializeData);
+        console.log(response);
       }
     }
   }

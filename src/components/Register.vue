@@ -46,6 +46,8 @@
 </template>
 
 <script>
+import Api from '../service/api';
+
 export default {
   name: 'Auth',
   data() {
@@ -65,9 +67,12 @@ export default {
       this.$refs.secretKey.validate(); //Запускаем валидацию поля секретного ключа
       //Если ошибок нет - отправляем запрос на сервер
       if (!this.$refs.login.hasError && !this.$refs.password.hasError && !this.$refs.secretKey.hasError) {
+        const api = new Api();
+
         const serializeData = JSON.stringify(this.data);
-        const response = await fetch('/register', { body: serializeData, method: 'POST' });
-        console.log(response.json());
+        const response = api.registerUser(serializeData);
+
+        console.log(response);
       }
     }
   }
