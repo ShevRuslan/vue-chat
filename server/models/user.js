@@ -18,15 +18,20 @@ const user = new Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
       maxLenght: 30
     },
     secretKey: {
       type: String,
       required: true,
       minlength: 8,
-      maxlength: 20
+      maxlength: 30
     },
+    refresh_token: {
+      type: String,
+      required: true,
+      unique: true
+  },
     _id: Number
   },
   { _id: false, versionKey: false }
