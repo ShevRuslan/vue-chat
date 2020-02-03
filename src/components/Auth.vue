@@ -58,8 +58,13 @@ export default {
       if (!this.$refs.login.hasError && !this.$refs.password.hasError) {
         const api = new Api();
         const serializeData = JSON.stringify(this.data);
+
+        //TODO:Сделать вывод ошибок
         const response = await api.loginUser(serializeData);
-        console.log(response);
+        const { token, refreshToken } = await response;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('refreshToken', refreshToken);
       }
     }
   }

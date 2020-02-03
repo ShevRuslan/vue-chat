@@ -69,10 +69,14 @@ export default {
       if (!this.$refs.login.hasError && !this.$refs.password.hasError && !this.$refs.secretKey.hasError) {
         const api = new Api();
 
+        //TODO:Сделать вывод ошибок
         const serializeData = JSON.stringify(this.data);
         const response = api.registerUser(serializeData);
 
-        console.log(response);
+        const { token, refreshToken } = await response;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('refreshToken', refreshToken);
       }
     }
   }

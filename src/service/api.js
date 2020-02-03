@@ -2,20 +2,20 @@ import axios from 'axios';
 
 export default class Api {
   getResource = async (url, data, method) => {
-    const response = await axios({
-      method: method,
-      url: url,
-      data: data,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    try {
+      const response = await axios({
+        method: method,
+        url: url,
+        data: data,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (!response.ok) {
-      throw new Error(`Could not fetch ${url}` + `, received ${response.status}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Could not fetch ${url}` + `, received ${error}`);
     }
-
-    return await response;
   };
 
   loginUser = async data => {
