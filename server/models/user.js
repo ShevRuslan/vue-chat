@@ -27,11 +27,15 @@ const user = new Schema(
       minlength: 8,
       maxlength: 30
     },
+    type: {
+      type: String,
+      default: user
+    },
     refresh_token: {
       type: String,
       required: true,
       unique: true
-  },
+    },
     _id: Number
   },
   { _id: false, versionKey: false }

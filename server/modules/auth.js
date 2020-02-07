@@ -44,18 +44,20 @@ module.exports = class {
       }
 
       if (bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign({ id: user.id }, config.secret, { expiresIn: config.tokenLife });
-        const refreshToken = jwt.sign({ id: user.id }, config.refreshTokenSecret, {
+        const token = jwt.sign({ id: user.id, type: user.type }, config.secret, { expiresIn: config.tokenLife });
+        const refreshToken = jwt.sign({ id: user.id, type: user.type }, config.refreshTokenSecret, {
           expiresIn: config.refreshTokenLife
         });
         user.refresh_token = refreshToken;
         await user.save();
         const res = {
+          'type': user.type,
           'status': 'Logged in',
           'success': true,
           'token': token,
           'refreshToken': refreshToken
         };
+
         response.status(200).json(res);
       }
     } catch (err) {
@@ -86,7 +88,8 @@ module.exports = class {
       login: login,
       secretKey: secretKey,
       password: bcrypt.hashSync(password, salt),
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
+      type: 'user'
     });
     try {
       const saveUser = await newUser.save();

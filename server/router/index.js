@@ -3,7 +3,8 @@ const router = express.Router();
 const authClass = require('../modules/auth');
 const { login, register, refreshToken } = new authClass();
 const { check } = require('express-validator');
-
+const adminPanel = require('../modules/admin');
+const { panel } = new adminPanel();
 router.post(
   '/register',
   [
@@ -19,7 +20,7 @@ router.post(
       .exists()
       .withMessage('Вы не ввели секретный ключ!')
       .isLength({ min: 8 })
-      .withMessage('Секретный ключ должен быть не меньше 8 символов'),
+      .withMessage('Секретный ключ должен быть не меньше 8 символов')
   ],
   register
 );
@@ -40,5 +41,7 @@ router.post(
 );
 
 router.post('/token', refreshToken);
+
+router.get('/admin', panel, [login]);
 
 module.exports = router;
