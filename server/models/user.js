@@ -7,6 +7,9 @@ const AutoIncrement = require('mongoose-sequence')(mongoose);
 login - уникальный логин
 passoword - пароль
 secretKey - секретный ключ, для восстановления пароль
+img - аватарка 
+type - тип пользователя (admin | user)
+refresh_token - сбрасывающий токен
 */
 const user = new Schema(
   {
@@ -27,9 +30,14 @@ const user = new Schema(
       minlength: 8,
       maxlength: 30
     },
+    img: {
+      type: String,
+      required: false,
+      default: null
+    },
     type: {
       type: String,
-      default: user
+      default: 'user'
     },
     refresh_token: {
       type: String,
