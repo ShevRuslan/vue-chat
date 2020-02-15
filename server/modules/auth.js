@@ -31,7 +31,7 @@ module.exports = class {
     const errors = validationResult(request).mapped();
     console.log(errors);
     if (Object.entries(errors).length !== 0 && errors.constructor === Object) {
-      return response.status(200).json({ errors: errors });
+      return response.status(400).json({ errors: errors });
     }
 
     const { login, password } = request.body;
@@ -40,7 +40,7 @@ module.exports = class {
       const user = await User.findOne({ login });
 
       if (!user) {
-        response.status(401).json({ message: 'Пользователь не найден.' });
+        response.status(404).json({ errors: { login: { msg: 'Пользователь не найден.' } } });
       }
 
       if (bcrypt.compareSync(password, user.password)) {
@@ -61,7 +61,7 @@ module.exports = class {
         response.status(200).json(res);
       }
     } catch (err) {
-      response.status(401).json({ message: `Ошибка с базой данных. ${err}` });
+      response.status(401).json({ errors: { msg: `Ошибка с базой данных. ${err}` } });
     }
   };
   //Регистрация пользователя
@@ -69,14 +69,15 @@ module.exports = class {
     const errors = validationResult(request).mapped();
 
     if (Object.entries(errors).length !== 0 && errors.constructor === Object) {
-      return response.status(200).json({ errors: errors });
+      return response.status(400).json({ errors: errors });
     }
 
     const { login, password, secretKey } = request.body;
+    // const img = request.file.path;
 
     const user = await User.findOne({ login });
     if (user) {
-      response.status(401).json({ message: 'Пользователь существует!' });
+      response.status(400).json({ errors: { register: { msg: 'Пользователь существует.' } } });
     }
     const countUsers = await User.count({});
     const lastId = countUsers + 1;
@@ -89,20 +90,20 @@ module.exports = class {
       secretKey: secretKey,
       password: bcrypt.hashSync(password, salt),
       refresh_token: refreshToken,
-      type: 'user'
+      type: 'user',
     });
     try {
       const saveUser = await newUser.save();
       if (saveUser) {
-        response.status(200).json({
-          status: 'Регистрация прошла успешно!',
+        response.status(201).json({
+          msg: 'Регистрация прошла успешно!',
           success: true,
           token: token,
           refreshToken: refreshToken
         });
       }
     } catch (err) {
-      response.status(500).json({ message: 'Регистрация провалилась.' });
+      response.status(500).json({ errors: { register: { msg: 'Регистрация провалилась.' } } });
     }
   };
   refreshToken = async (request, response) => {
