@@ -11,7 +11,7 @@
     >
       <q-scroll-area class="fit">
         <q-list>
-          <q-item clickable v-ripple v-for="user in users" v-bind:key="user.id">
+          <q-item clickable v-ripple v-for="user in users" v-bind:key="user.id" @click="changeUser(user.name)">
             <q-item-section avatar>
               <q-avatar>
                 <img :src="user.img" />
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 export default {
   data() {
     return {
@@ -40,30 +41,24 @@ export default {
       miniState: false,
       users: [
         {
-          name: 'Кирилл Аверин',
+          name: 'Ruslan2',
           img: 'https://sun9-19.userapi.com/c855324/v855324919/1e8396/iziVQwerb1g.jpg',
           time: '17:01',
           lastMessage: 'Дарова!',
           id: '1'
         },
         {
-          name: 'Руслан Шевцов',
+          name: 'Ruslan23',
           img: 'https://sun9-21.userapi.com/c857532/v857532016/157744/miRG5h_IcBY.jpg',
           time: '17:01',
           lastMessage: 'Дарова!',
           id: '2'
-        },
-        {
-          name: 'Кирилл Аверин',
-          img: 'https://sun9-19.userapi.com/c855324/v855324919/1e8396/iziVQwerb1g.jpg',
-          time: '17:01',
-          lastMessage: 'Дарова!',
-          id: '3'
-        },
+        }
       ]
     };
   },
   methods: {
+    ...mapActions(['addUser']),
     drawerClick(e) {
       // if in "mini" state and user
       // click on drawer, we switch it to "normal" mode
@@ -75,6 +70,10 @@ export default {
         // intended for switching drawer to "normal" mode only
         e.stopPropagation();
       }
+    },
+    changeUser(user) {
+      console.log(user);
+      this.addUser(user);
     }
   }
 };

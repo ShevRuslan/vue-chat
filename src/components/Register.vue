@@ -13,7 +13,7 @@
           v-model="data.login"
           ref="login"
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Введите логин!']"
+          :rules="[val => !!val || 'Введите логин!', val => val.length >= 8 || 'Логин должен быть больше 8 символов!']"
         />
         <q-input
           v-model="data.password"
@@ -23,7 +23,10 @@
           class="input"
           ref="password"
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Введите пароль!']"
+          :rules="[
+            val => !!val || 'Введите пароль!',
+            val => val.length >= 8 || 'Пароль должен быть больше 8 символов!'
+          ]"
         >
           <template v-slot:append>
             <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
@@ -36,8 +39,12 @@
           class="input"
           ref="secretKey"
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Введите секретный ключ!']"
+          :rules="[
+            val => !!val || 'Введите секретный ключ!',
+            val => val.length >= 8 || 'Пароль должен быть больше 8 символов!'
+          ]"
         />
+
         <q-btn label="Зарегистрироваться" type="submit" color="primary" class="input" v-on:click="submit" />
       </q-form>
       <q-btn size="12px" flat v-on:click="$emit('showAuth')">Авторизироваться</q-btn>
@@ -55,28 +62,47 @@ export default {
       data: {
         login: '',
         password: '',
-        secretKey: ''
+        secretKey: '',
+        img: ''
       },
-      isPwd: true
+      isPwd: true,
+      closeError: null
     };
   },
   methods: {
     submit: async function() {
+      if (typeof this.closeError == 'function') {
+        this.closeError();
+      }
       this.$refs.login.validate(); //Запускаем валидацию поля логина
       this.$refs.password.validate(); //Запускаем валидацию поля пароля
       this.$refs.secretKey.validate(); //Запускаем валидацию поля секретного ключа
+
       //Если ошибок нет - отправляем запрос на сервер
       if (!this.$refs.login.hasError && !this.$refs.password.hasError && !this.$refs.secretKey.hasError) {
         const api = new Api();
-
-        //TODO:Сделать вывод ошибок
         const serializeData = JSON.stringify(this.data);
-        const response = api.registerUser(serializeData);
 
-        const { token, refreshToken } = await response;
+        try {
+          const response = await api.registerUser(serializeData);
+          const { token, refreshToken } = await response;
 
-        localStorage.setItem('token', token);
-        localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('token', token);
+          localStorage.setItem('refreshToken', refreshToken);
+          this.$router.push({name: 'chat'})
+        } catch (e) {
+          const { errors } = e.response.data;
+          let errorsTemplate = ``;
+          for (let error in errors) {
+            errorsTemplate += `${errors[error].msg} <br>`;
+          }
+          this.closeError = this.$q.notify({
+            message: errorsTemplate,
+            type: 'negative',
+            html: true,
+            actions: [{ icon: 'close', color: 'white' }]
+          });
+        }
       }
     }
   }

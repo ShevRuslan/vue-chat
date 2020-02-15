@@ -1,6 +1,6 @@
 <template>
   <div class="window-height column items-center q-pa-lg justify-center">
-    <h3>LeebarChat - чат твоей мечты!</h3>
+    <h3>Vue-Chat - чат твоей мечты!</h3>
     <transition name="component-fade" mode="out-in">
       <component v-on:showAuth="changeForm" v-bind:is="showAuth ? 'Auth' : 'Register'"></component>
     </transition>

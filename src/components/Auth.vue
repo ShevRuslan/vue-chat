@@ -1,7 +1,9 @@
 <template>
   <q-card class="my-card ">
     <q-card-section>
-      <h5 class="text-center q-ma-none ">Авторизация</h5>
+      <h5 class="text-center q-ma-none ">
+        Авторизация
+      </h5>
     </q-card-section>
 
     <q-card-actions class="column items-start">
@@ -13,7 +15,7 @@
           v-model="data.login"
           ref="login"
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Введите логин!']"
+          :rules="[val => !!val || 'Введите логин!', val => val.length >= 8 || 'Логин должен быть больше 8 символов']"
         />
         <q-input
           v-model="data.password"
@@ -23,7 +25,10 @@
           class="input"
           ref="password"
           lazy-rules
-          :rules="[val => (val && val.length > 0) || 'Введите пароль!']"
+          :rules="[
+            val => !!val || 'Введите пароль!',
+            val => val.length >= 8 || 'Пароль должен быть больше 8 символов!'
+          ]"
         >
           <template v-slot:append>
             <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
@@ -47,24 +52,42 @@ export default {
         login: '',
         password: ''
       },
-      isPwd: true
+      isPwd: true,
+      closeError: null
     };
   },
   methods: {
     submit: async function() {
+      if (typeof this.closeError == 'function') {
+        this.closeError();
+      }
       this.$refs.login.validate(); //Запускаем валидацию поля логина
       this.$refs.password.validate(); //Запускаем валидацию поля пароля
+
       //Если ошибок нет - отправляем запрос на сервер
       if (!this.$refs.login.hasError && !this.$refs.password.hasError) {
         const api = new Api();
         const serializeData = JSON.stringify(this.data);
+        try {
+          const response = await api.loginUser(serializeData);
+          const { token, refreshToken } = await response;
 
-        //TODO:Сделать вывод ошибок
-        const response = await api.loginUser(serializeData);
-        const { token, refreshToken } = await response;
-
-        localStorage.setItem('token', token);
-        localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('token', token);
+          localStorage.setItem('refreshToken', refreshToken);
+          this.$router.push({ name: 'chat' });
+        } catch (e) {
+          const { errors } = e.response.data;
+          let errorsTemplate = ``;
+          for (let error in errors) {
+            errorsTemplate += `${errors[error].msg} <br>`;
+          }
+          this.closeError = this.$q.notify({
+            message: errorsTemplate,
+            type: 'negative',
+            html: true,
+            actions: [{ icon: 'close', color: 'white' }]
+          });
+        }
       }
     }
   }

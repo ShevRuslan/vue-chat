@@ -1,16 +1,11 @@
 <template>
-  <router-view />
+  <div id="q-app">
+    <router-view />
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'LayoutDefault',
-  data() {
-    return {
-      leftDrawerOpen: false
-    };
-  }
-};
+  name: 'App'
+}
 </script>
-
-<style></style>

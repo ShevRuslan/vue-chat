@@ -1,60 +1,44 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
-import Chat from '../views/Chat.vue';
-import auth from './middleware/auth';
-import guest from './middleware/guest';
-import store from '../store';
 import middlewarePipeline from './middlewarePipeline';
+import routes from './routes';
 
 Vue.use(VueRouter);
 
-const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: Home,
-    meta: {
-      middleware: [guest]
-    }
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  },
-  {
-    path: '/chat',
-    name: 'chat',
-    component: Chat,
-    meta: {
-      middleware: [auth]
-    }
-  }
-];
+/*
+ * If not building with SSR mode, you can
+ * directly export the Router instantiation;
+ *
+ * The function below can be async too; either use
+ * async/await or return a Promise which resolves
+ * with the Router instance.
+ */
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-});
-router.beforeEach((to, from, next) => {
-  if (!to.meta.middleware) {
-    return next();
-  }
-  const middleware = to.meta.middleware;
-  const context = {
-    to,
-    from,
-    next,
-    store
-  };
-  return middleware[0]({
-    ...context,
-    next: middlewarePipeline(context, middleware, 1)
+export default function({ store /*ssrContext*/ }) {
+  const Router = new VueRouter({
+    scrollBehavior: () => ({ x: 0, y: 0 }),
+    routes,
+    // Leave these as they are and change in quasar.conf.js instead!
+    // quasar.conf.js -> build -> vueRouterMode
+    // quasar.conf.js -> build -> publicPath
+    mode: process.env.VUE_ROUTER_MODE,
+    base: process.env.VUE_ROUTER_BASE
   });
-});
-export default router;
+  Router.beforeEach((to, from, next) => {
+    if (!to.meta.middleware) {
+      return next();
+    }
+    const middleware = to.meta.middleware;
+    const context = {
+      to,
+      from,
+      next,
+      store
+    };
+    return middleware[0]({
+      ...context,
+      next: middlewarePipeline(context, middleware, 1)
+    });
+  });
+  return Router;
+}

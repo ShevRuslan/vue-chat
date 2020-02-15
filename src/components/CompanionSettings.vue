@@ -1,14 +1,14 @@
 <template>
   <div>
     <q-toolbar class="border q-px-xl ">
-      <q-btn stretch no-caps flat label="Руслан Шевцов" />
+      <q-btn stretch no-caps flat :label="connections" />
 
       <q-space />
-      <q-form @submit="onSubmit" @reset="onReset" class="row justify-center items-center q-pa-md form">
-        <q-input placeholder="Поиск по истории сообщений" dense outlined="" v-model="text" input-class="text-left" class="q-ml-md search">
+      <q-form class="row justify-center items-center q-pa-md form">
+        <q-input placeholder="Поиск по истории сообщений" dense outlined="" input-class="text-left" class="q-ml-md search">
           <template v-slot:append>
             <q-icon v-if="text === ''" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="text = ''" />
+            <q-icon v-else name="clear" class="cursor-pointer"/>
           </template>
         </q-input>
       </q-form>
@@ -50,6 +50,7 @@
 
 <script>
 export default {
+  props: ['connections'],
   data() {
     return {
       text: ''
