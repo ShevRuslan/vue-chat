@@ -15,21 +15,35 @@ app.use(express.static(publicPath));
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(passport.initialize());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', router);
 
+//Socket
+
+let users = {};
+
 io.on('connection', socket => {
+
   console.log(Object.keys(io.sockets.connected).length);
 
   socket.emit('connections', Object.keys(io.sockets.connected).length);
 
   socket.on('chatMessage', data => {
-    console.log(data);
-    socket.broadcast.emit('chatMessage', data);
+
+    let user = users[data.receiver];
+ 
+    io.to(user).emit('chatMessage', data);
+
+    console.log('New message:', data);
   });
 
   socket.on('joined', data => {
-    console.log('Joined', data);
-    socket.broadcast.emit('joined', data);
+
+    users[data] = socket.id;
+
+    console.log('Joined in chat:', data);
+    
+    io.emit('joined', data);
   });
 
   socket.on('leave', data => {
