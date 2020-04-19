@@ -18,6 +18,10 @@ const user = new Schema(
       required: true,
       unique: true
     },
+    email: {
+      type: String,
+      required: true
+    },
     password: {
       type: String,
       required: true,
@@ -35,6 +39,11 @@ const user = new Schema(
       required: false,
       default: null
     },
+    status: {
+      type: String,
+      required: false,
+      default: ''
+    },
     type: {
       type: String,
       default: 'user'
@@ -43,6 +52,11 @@ const user = new Schema(
       type: String,
       required: true,
       unique: true
+    },
+    uuid: {
+      type: String,
+      required: true,
+      unique: true,
     },
     _id: Number
   },
