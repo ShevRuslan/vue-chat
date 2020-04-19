@@ -7,6 +7,7 @@ const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const ExtractJWT = passportJWT.ExtractJwt;
 const JWTStrategy = passportJWT.Strategy;
+const uuid = require('uuid');
 const { validationResult } = require('express-validator');
 
 const jwtOptions = {
@@ -14,7 +15,7 @@ const jwtOptions = {
   secretOrKey: config.secret
 };
 const strategy = new JWTStrategy(jwtOptions, (payload, next) => {
-  User.findOne({ _id: payload.id }, (err, user) => {
+  User.findOne({ uuid: payload.uuid }, (err, user) => {
     if (err) return next(err);
     if (user) {
       next(null, user);
@@ -29,7 +30,7 @@ module.exports = class {
   //Авторизация пользователя
   login = async (request, response) => {
     const errors = validationResult(request).mapped();
-    console.log(errors);
+
     if (Object.entries(errors).length !== 0 && errors.constructor === Object) {
       return response.status(400).json({ errors: errors });
     }
@@ -44,8 +45,8 @@ module.exports = class {
       }
 
       if (bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign({ id: user.id, type: user.type }, config.secret, { expiresIn: config.tokenLife });
-        const refreshToken = jwt.sign({ id: user.id, type: user.type }, config.refreshTokenSecret, {
+        const token = jwt.sign({ uuid: user.uuid, type: user.type }, config.secret, { expiresIn: config.tokenLife });
+        const refreshToken = jwt.sign({ uuid: user.uuid, type: user.type }, config.refreshTokenSecret, {
           expiresIn: config.refreshTokenLife
         });
         user.refresh_token = refreshToken;
@@ -72,25 +73,28 @@ module.exports = class {
       return response.status(400).json({ errors: errors });
     }
 
-    const { login, password, secretKey } = request.body;
-    // const img = request.file.path;
+    const { login, password, secretKey, email } = request.body;
 
+    
     const user = await User.findOne({ login });
+    const userUnicId = uuid.v4();
     if (user) {
       response.status(400).json({ errors: { register: { msg: 'Пользователь существует.' } } });
     }
-    const countUsers = await User.count({});
-    const lastId = countUsers + 1;
-    const token = jwt.sign({ id: lastId }, config.secret, { expiresIn: config.tokenLife });
-    const refreshToken = jwt.sign({ id: lastId }, config.refreshTokenSecret, {
+
+    const token = jwt.sign({ uuid: userUnicId, type: 'user' }, config.secret, { expiresIn: config.tokenLife });
+    const refreshToken = jwt.sign({ uuid: userUnicId, type: 'user' }, config.refreshTokenSecret, {
       expiresIn: config.refreshTokenLife
     });
+
     let newUser = new User({
       login: login,
+      email: email,
       secretKey: secretKey,
       password: bcrypt.hashSync(password, salt),
+      uuid: userUnicId,
       refresh_token: refreshToken,
-      type: 'user',
+      type: 'user'
     });
     try {
       const saveUser = await newUser.save();
@@ -117,8 +121,8 @@ module.exports = class {
       } else {
         const user = await User.findOne({ refresh_token: refreshToken });
         if (user) {
-          const token = jwt.sign({ id: user.id }, config.secret, { expiresIn: config.tokenLife });
-          const refreshToken = jwt.sign({ id: user.id }, config.refreshTokenSecret, {
+          const token = jwt.sign({ uuid: user.uuid }, config.secret, { expiresIn: config.tokenLife });
+          const refreshToken = jwt.sign({ uuid: user.uuid }, config.refreshTokenSecret, {
             expiresIn: config.refreshTokenLife
           });
           const res = {
