@@ -1,6 +1,5 @@
-export default function guest({ next, store }) {
-  if (store.getters.getAuth || localStorage.getItem('token')) {
-    //TODO: Добавлять в хранилище loggedIn = true
+export default function guest({ next }) {
+  if (localStorage.getItem('token')) {
     return next({
       name: 'chat'
     });
