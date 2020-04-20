@@ -1,6 +1,8 @@
-export default function auth({ next, router }) {
+export default function auth({ next }) {
   if (!localStorage.getItem('token')) {
-    return router.push({ name: 'home' });
+    return next({
+      name: 'home'
+    });
   }
 
   return next();

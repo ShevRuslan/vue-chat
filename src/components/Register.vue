@@ -1,7 +1,7 @@
 <template>
-  <q-card class="my-card">
+  <q-card class="my-card q-pa-lg">
     <q-card-section>
-      <h5 class="text-center q-ma-none ">Регистрация</h5>
+      <h5 class="text-center q-ma-none q-mb-md">Регистрация</h5>
     </q-card-section>
 
     <q-card-actions class="column items-start">
@@ -10,13 +10,22 @@
           outlined
           label="Логин"
           class="input"
-          v-model="data.login"
+          v-model.trim="data.login"
           ref="login"
           lazy-rules
           :rules="[val => !!val || 'Введите логин!', val => val.length >= 8 || 'Логин должен быть больше 8 символов!']"
         />
         <q-input
-          v-model="data.password"
+          outlined
+          label="E-mail"
+          class="input"
+          v-model.trim="data.email"
+          ref="email"
+          lazy-rules
+          :rules="[val => !!val || 'Введите email!', val => val.length >= 8 || 'E-mail должен быть больше 8 символов!']"
+        />
+        <q-input
+          v-model.trim="data.password"
           :type="isPwd ? 'password' : 'text'"
           outlined
           label="Пароль"
@@ -33,7 +42,7 @@
           </template>
         </q-input>
         <q-input
-          v-model="data.secretKey"
+          v-model.trim="data.secretKey"
           outlined
           label="Секретный ключ"
           class="input"
@@ -61,6 +70,7 @@ export default {
     return {
       data: {
         login: '',
+        email: '',
         password: '',
         secretKey: '',
         img: ''
@@ -75,11 +85,12 @@ export default {
         this.closeError();
       }
       this.$refs.login.validate(); //Запускаем валидацию поля логина
+      this.$refs.email.validate(); //Запускаем валидацию поля email
       this.$refs.password.validate(); //Запускаем валидацию поля пароля
       this.$refs.secretKey.validate(); //Запускаем валидацию поля секретного ключа
 
       //Если ошибок нет - отправляем запрос на сервер
-      if (!this.$refs.login.hasError && !this.$refs.password.hasError && !this.$refs.secretKey.hasError) {
+      if (!this.$refs.login.hasError && !this.$refs.password.hasError && !this.$refs.secretKey.hasError && !this.$refs.email.hasError) {
         const api = new Api();
         const serializeData = JSON.stringify(this.data);
 
@@ -110,7 +121,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .my-card {
-  width: 420px;
+  width: 500px;
   .width {
     width: 100%;
   }

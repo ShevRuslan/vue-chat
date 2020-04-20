@@ -1,7 +1,7 @@
 <template>
-  <q-card class="my-card ">
+  <q-card class="my-card q-pa-lg">
     <q-card-section>
-      <h5 class="text-center q-ma-none ">
+      <h5 class="text-center q-ma-none q-mb-md">
         Авторизация
       </h5>
     </q-card-section>
@@ -12,13 +12,13 @@
           outlined
           label="Логин"
           class="input"
-          v-model="data.login"
+          v-model.trim="data.login"
           ref="login"
           lazy-rules
           :rules="[val => !!val || 'Введите логин!', val => val.length >= 8 || 'Логин должен быть больше 8 символов']"
         />
         <q-input
-          v-model="data.password"
+          v-model.trim="data.password"
           :type="isPwd ? 'password' : 'text'"
           outlined
           label="Пароль"
@@ -95,7 +95,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .my-card {
-  width: 420px;
+  width: 500px;
   .width {
     width: 100%;
   }
