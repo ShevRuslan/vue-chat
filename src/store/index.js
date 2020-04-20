@@ -17,13 +17,14 @@ Vue.use(Vuex);
 export default function(/* { ssrContext } */) {
   const Store = new Vuex.Store({
     state: {
-      loggedIn: false,
       user: {
         login: '',
-        img: ''
+        img: null, 
+        status: '',
       },
       chat: {
-        username: ''
+        login: '',
+        img: null
       }
     },
     getters: {
@@ -31,23 +32,19 @@ export default function(/* { ssrContext } */) {
         return state.user;
       },
       getCompanion(state) {
-        return state.chat.username;
+        return state.chat;
       },
-      getAuth(state) {
-        return state.loggedIn;
-      }
     },
+    //sync
     mutations: {
       addInfoAboutUser(state, payload) {
         state.user = { ...state.user, ...payload };
       },
       addUser(state, payload) {
-        state.chat.username = payload;
+        state.chat = {...state.chat, ...payload};
       },
-      logged(state, payload) {
-        state.loggedIn = payload;
-      }
     },
+    //async
     actions: {
       addInfoAboutUser({ commit }, user) {
         commit('addInfoAboutUser', user);
