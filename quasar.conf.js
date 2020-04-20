@@ -68,10 +68,20 @@ module.exports = function() {
         'QSpace',
         'QScrollArea',
         'QChatMessage',
-        'QSeparator'
+        'QSeparator',
+        'QBadge',
+        'QSpinner',
+        'QSpinnerPie',
+        'QDialog',
+        'QImg',
+        'QInfiniteScroll',
+        'QTooltip',
+        'QFab',
+        'QFabAction',
+        'QSlideTransition'
       ],
 
-      directives: ['Ripple'],
+      directives: ['Ripple', 'ClosePopup'],
 
       // Quasar plugins
       plugins: ['Notify', 'Meta']
@@ -111,7 +121,7 @@ module.exports = function() {
         // proxy all requests starting with /api to jsonplaceholder
         '/api': {
           target: 'http://localhost:3001',
-          changeOrigin: true,
+          changeOrigin: true
         }
       }
     },
