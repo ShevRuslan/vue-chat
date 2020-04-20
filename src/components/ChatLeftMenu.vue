@@ -5,21 +5,25 @@
       show-if-above
       :mini="!drawer || miniState"
       @click.capture="drawerClick"
-      :width="200"
+      :width="300"
       :breakpoint="500"
       bordered
     >
       <q-scroll-area class="fit">
         <q-list>
-          <q-item clickable v-ripple v-for="user in users" v-bind:key="user.id" @click="changeUser(user.name)">
-            <q-item-section avatar>
-              <q-avatar>
-                <img :src="user.img" />
+          <q-item clickable v-ripple v-for="user in users" v-bind:key="user.id" @click="changeUser(user)">
+            <q-item-section side>
+              <q-avatar rounded size="48px">
+                <img :src="user.img" style="object-fit:cover"/>
+                <q-badge floating color="teal">new</q-badge>
               </q-avatar>
             </q-item-section>
-
             <q-item-section>
-              {{ user.name }}
+              <q-item-label> {{ user.login }}</q-item-label>
+              <q-item-label caption>{{ user.newMessage }} new messages</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              3 min ago
             </q-item-section>
           </q-item>
         </q-list>
@@ -41,17 +45,19 @@ export default {
       miniState: false,
       users: [
         {
-          name: 'Ruslan2',
+          login: 'Ruslan2',
           img: 'https://sun9-19.userapi.com/c855324/v855324919/1e8396/iziVQwerb1g.jpg',
           time: '17:01',
           lastMessage: 'Дарова!',
+          newMessage: 10,
           id: '1'
         },
         {
-          name: 'Ruslan23',
-          img: 'https://sun9-21.userapi.com/c857532/v857532016/157744/miRG5h_IcBY.jpg',
+          login: 'Ruslan23',
+          img: 'https://sun9-60.userapi.com/c204720/v204720883/5e78e/KgdzSM84zFw.jpg',
           time: '17:01',
           lastMessage: 'Дарова!',
+          newMessage: 5,
           id: '2'
         }
       ]

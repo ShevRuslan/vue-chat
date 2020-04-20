@@ -24,6 +24,7 @@ import ListMessages from '../components/ListMessages';
 import FormSendMessage from '../components/FormSendMessage';
 import Api from '../service/api';
 import { mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 export default {
   components: {
     Header,
@@ -40,8 +41,14 @@ export default {
       username: ''
     };
   },
-  created: function() {
-    this.getInfoAboutUser();
+   computed: {
+    ...mapGetters(['getCompanion']),
+    login() {
+      return this.getCompanion.login;
+    },
+  },
+  created: async function() {
+    await this.getInfoAboutUser();
     
     this.$socket.emit('joined', this.username);
 
@@ -81,7 +88,7 @@ export default {
       });
       this.$q.notify({
         type: 'positive',
-        message: `${data.user} - ${data.message}`,
+        message: `${data.sender} - ${data.message}`,
         actions: [{ icon: 'close', color: 'white' }],
         position: 'bottom-left'
       });
@@ -97,7 +104,8 @@ export default {
       let createTime = Date.now();
       const messageObj = {
         message: newMessage,
-        user: this.username,
+        sender: this.username,
+        receiver: this.login,
         time: createTime
       };
       this.messages.push(messageObj);
@@ -107,6 +115,7 @@ export default {
     async getInfoAboutUser() {
       const api = new Api();
       const { user } = await api.getInfoUser();
+      console.log(user);
       this.addInfoAboutUser(user);
       this.username = user.login;
     }
